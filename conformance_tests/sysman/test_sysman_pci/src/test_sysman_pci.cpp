@@ -39,10 +39,13 @@ TEST_F(PCI_TEST, GivenSysmanHandleWhenRetrievingStateThenStateIsReturned) {
     EXPECT_GE(pciState.status, ZES_PCI_LINK_STATUS_UNKNOWN);
     EXPECT_LE(pciState.status, ZES_PCI_LINK_STATUS_STABILITY_ISSUES);
     if (pciState.status == ZES_PCI_LINK_STATUS_STABILITY_ISSUES) {
-      EXPECT_GE(pciState.qualityIssues, ZES_PCI_LINK_QUAL_ISSUE_FLAG_REPLAYS);
-      EXPECT_LE(pciState.qualityIssues, ZES_PCI_LINK_QUAL_ISSUE_FLAG_SPEED);
+      EXPECT_EQ(pciState.qualityIssues, 0);
       EXPECT_EQ(pciState.stabilityIssues,
                 ZES_PCI_LINK_STAB_ISSUE_FLAG_RETRAINING);
+    } else if (pciState.status == ZES_PCI_LINK_STATUS_QUALITY_ISSUES) {
+      EXPECT_EQ(pciState.stabilityIssues, 0);
+      EXPECT_GE(pciState.qualityIssues, ZES_PCI_LINK_QUAL_ISSUE_FLAG_REPLAYS);
+      EXPECT_GE(pciState.qualityIssues, ZES_PCI_LINK_QUAL_ISSUE_FLAG_SPEED);
     } else {
       EXPECT_EQ(pciState.qualityIssues, 0);
       EXPECT_EQ(pciState.stabilityIssues, 0);
