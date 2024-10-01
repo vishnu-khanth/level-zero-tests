@@ -14,6 +14,7 @@
 
 #include <boost/process.hpp>
 #include <boost/filesystem.hpp>
+#include <thread>
 
 namespace bp = boost::process;
 namespace fs = boost::filesystem;
@@ -538,7 +539,8 @@ ze_device_handle_t get_core_device_by_uuid(uint8_t *uuid) {
 }
 #endif // USE_ZESINIT
 
-void compute_workload(workload_thread_parameters *t_params) {
+void compute_workload(workload_thread_parameters *t_params,
+                      zes_device_handle_t sysman_device) {
 
   int m, k, n;
   m = k = n = 512;
@@ -581,19 +583,82 @@ void compute_workload(workload_thread_parameters *t_params) {
   tg.groupCountY = group_count_y;
   tg.groupCountZ = 1;
 
-  zeCommandListAppendLaunchKernel(cmd_list, function, &tg, nullptr, 0, nullptr);
+  // events creation
+  ze_event_pool_handle_t event_pool;
+  ze_event_pool_desc_t event_pool_desc = {ZE_STRUCTURE_TYPE_EVENT_POOL_DESC,
+                                          nullptr,
+                                          ZE_EVENT_POOL_FLAG_HOST_VISIBLE, 2};
+  zeEventPoolCreate(lzt::get_default_context(), &event_pool_desc, 0, nullptr,
+                    &event_pool);
+
+  ze_event_handle_t start_event, end_event;
+  ze_event_desc_t event_desc = {ZE_STRUCTURE_TYPE_EVENT_DESC, nullptr, 0,
+                                ZE_EVENT_SCOPE_FLAG_DEVICE,
+                                ZE_EVENT_SCOPE_FLAG_HOST};
+  zeEventCreate(event_pool, &event_desc, &start_event);
+  event_desc.index = 1;
+  zeEventCreate(event_pool, &event_desc, &end_event);
+
+  zeCommandListAppendSignalEvent(cmd_list, start_event);
+
+  for (int i = 0; i < 20; ++i) {
+    zeCommandListAppendLaunchKernel(cmd_list, function, &tg, nullptr, 0,
+                                    nullptr);
+  }
+
+  zeCommandListAppendSignalEvent(cmd_list, end_event);
+
+  // zeCommandListAppendLaunchKernel(cmd_list, function, &tg, nullptr, 0,
+  // nullptr);
   lzt::append_barrier(cmd_list, nullptr, 0, nullptr);
   lzt::close_command_list(cmd_list);
   ze_command_queue_handle_t cmd_q = lzt::create_command_queue(device);
 
-  uint32_t number_iterations = 100;
-  while (number_iterations--) {
-    lzt::execute_command_lists(cmd_q, 1, &cmd_list, nullptr);
-    lzt::synchronize(cmd_q, UINT64_MAX);
-    t_params->get_process_state_flag = true;
-    t_params->condition.notify_one();
+  lzt::execute_command_lists(cmd_q, 1, &cmd_list, nullptr);
+
+  auto start = std::chrono::high_resolution_clock::now();
+  zeEventHostSynchronize(start_event, UINT64_MAX);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = end - start;
+  std::cout << "Time elapsed for start event: " << elapsed.count() << " seconds"
+            << std::endl;
+
+  start = std::chrono::high_resolution_clock::now();
+
+  bool is_compute_engine = false;
+  while (zeEventQueryStatus(end_event) != ZE_RESULT_SUCCESS) {
+    std::cout << "Inside while loop!" << std::endl;
+    uint32_t count = 0;
+    auto processes = lzt::get_processes_state(sysman_device, count);
+
+    for (const auto &process : processes) {
+      if (process.engines == ZES_ENGINE_TYPE_FLAG_COMPUTE) {
+        std::cout << "The engine type used is compute." << std::endl;
+        is_compute_engine = true;
+        break;
+      }
+    }
+    processes.clear();
+
+    if (is_compute_engine) {
+      break;
+    }
+    // Sleep for sometime before next check
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
+  zeEventHostSynchronize(end_event, UINT64_MAX);
+  end = std::chrono::high_resolution_clock::now();
+  elapsed = end - start;
+  std::cout << "Time elapsed for end event: " << elapsed.count() << " seconds"
+            << std::endl;
+
+  EXPECT_TRUE(is_compute_engine);
+  lzt::synchronize(cmd_q, UINT64_MAX);
+
+  zeEventDestroy(start_event);
+  zeEventDestroy(end_event);
+  zeEventPoolDestroy(event_pool);
   lzt::destroy_command_queue(cmd_q);
   lzt::destroy_command_list(cmd_list);
   lzt::destroy_function(function);
@@ -668,17 +733,13 @@ TEST_F(
         get_core_device_by_uuid(sysman_device_properties.core.uuid.id);
     EXPECT_NE(core_device, nullptr);
     t_params.device = core_device;
-    std::thread thread(compute_workload, &t_params);
+    compute_workload(&t_params, device);
 #else  // USE_ZESINIT
     t_params.device = device;
-    std::thread thread(compute_workload, &t_params);
+    compute_workload(&t_params, device);
 #endif // USE_ZESINIT
 
-    uint32_t count = 0;
-    std::unique_lock<std::mutex> locker(t_params.device_mutex);
-    t_params.condition.wait(locker,
-                            [&] { return t_params.get_process_state_flag; });
-
+    /*
     uint32_t engine_type = 0;
     while (engine_type != ZES_ENGINE_TYPE_FLAG_COMPUTE) {
       auto processes = lzt::get_processes_state(device, count);
@@ -687,9 +748,7 @@ TEST_F(
       }
       processes.clear();
     }
-
-    thread.join();
-    EXPECT_EQ(engine_type, ZES_ENGINE_TYPE_FLAG_COMPUTE);
+    */
   }
 }
 
