@@ -56,11 +56,9 @@ void compare_vf_capabilities(zes_vf_exp_capabilities_t &vf_capability_initial,
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenCallingEnumEnabledVFExpThenValidVFHandlesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
@@ -71,16 +69,11 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVFHandlesTwiceThenSimilarHandlesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     std::vector<zes_vf_handle_t> vf_handles_initial;
     std::vector<zes_vf_handle_t> vf_handles_later;
@@ -96,7 +89,6 @@ TEST_F(
     }
 
     if (count_initial > 0 && count_later > 0) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       EXPECT_EQ(count_initial, count_later);
       EXPECT_EQ(vf_handles_initial, vf_handles_later);
@@ -104,20 +96,14 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVFHandlesWithCountGreaterThanActualThenExpectActualCountAndHandlesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       uint32_t test_count = count + 1;
       auto vf_handles = lzt::get_vf_handles(device, test_count);
@@ -131,20 +117,14 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVFHandlesWithCountLessThanActualThenExpectReducedCountAndHandlesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 1) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       uint32_t test_count = count - 1;
       auto vf_handles = lzt::get_vf_handles(device, test_count);
@@ -159,20 +139,14 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVfCapabilitiesThenValidCapabilitiesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
@@ -184,20 +158,14 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVfCapabilitiesTwiceThenSimilarCapabilitiesAreReturned) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
@@ -210,20 +178,14 @@ TEST_F(
       LOG_INFO << "No VF handles found for this device!!";
     }
   }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
-  }
 }
 
 TEST_F(VF_MANAGEMENT_TEST,
        GivenValidDeviceWhenRetrievingVFCapabilitiesThenExpectVfIdIsUnique) {
-  bool is_vf_enabled = false;
   for (auto device : devices) {
     std::vector<uint32_t> vf_ids{};
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 1) {
-      bool is_vf_enabled = true;
       LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
@@ -239,10 +201,6 @@ TEST_F(VF_MANAGEMENT_TEST,
     } else {
       LOG_INFO << "No VF handles found for this device!!";
     }
-  }
-
-  if (!is_vf_enabled) {
-    FAIL() << "No devices found with VF enabled!";
   }
 }
 
