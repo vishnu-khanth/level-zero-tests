@@ -59,6 +59,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
+      LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
       for (const auto &vf_handle : vf_handles) {
@@ -88,6 +89,7 @@ TEST_F(
     }
 
     if (count_initial > 0 && count_later > 0) {
+      LOG_INFO << "VF is enabled on this device!!";
       EXPECT_EQ(count_initial, count_later);
       EXPECT_EQ(vf_handles_initial, vf_handles_later);
     } else {
@@ -102,6 +104,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
+      LOG_INFO << "VF is enabled on this device!!";
       uint32_t test_count = count + 1;
       auto vf_handles = lzt::get_vf_handles(device, test_count);
       EXPECT_EQ(count, test_count);
@@ -122,6 +125,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 1) {
+      LOG_INFO << "VF is enabled on this device!!";
       uint32_t test_count = count - 1;
       auto vf_handles = lzt::get_vf_handles(device, test_count);
       EXPECT_EQ(count - 1, test_count);
@@ -141,6 +145,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
+      LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
       for (const auto &vf_handle : vf_handles) {
@@ -159,6 +164,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 0) {
+      LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
       for (const auto &vf_handle : vf_handles) {
@@ -178,6 +184,7 @@ TEST_F(VF_MANAGEMENT_TEST,
     std::vector<uint32_t> vf_ids{};
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 1) {
+      LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
       for (const auto &vf_handle : vf_handles) {
