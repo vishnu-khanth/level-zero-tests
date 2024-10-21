@@ -183,9 +183,9 @@ TEST_F(
 TEST_F(VF_MANAGEMENT_TEST,
        GivenValidDeviceWhenRetrievingVFCapabilitiesThenExpectVfIdIsUnique) {
   for (auto device : devices) {
-    std::vector<uint32_t> vf_ids{};
     uint32_t count = lzt::get_vf_handles_count(device);
     if (count > 1) {
+      std::vector<uint32_t> vf_ids{};
       LOG_INFO << "VF is enabled on this device!!";
       auto vf_handles = lzt::get_vf_handles(device, count);
 
