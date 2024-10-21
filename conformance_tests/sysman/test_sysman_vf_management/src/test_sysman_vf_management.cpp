@@ -57,6 +57,29 @@ void compare_vf_capabilities(zes_vf_exp_capabilities_t &vf_capability_initial,
   EXPECT_EQ(vf_capability_initial.vfID, vf_capability_later.vfID);
 }
 
+#ifdef USE_ZESINIT
+bool is_uuid_pair_equal(uint8_t *uuid1, uint8_t *uuid2) {
+  for (uint32_t i = 0; i < ZE_MAX_UUID_SIZE; i++) {
+    if (uuid1[i] != uuid2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+ze_device_handle_t get_core_device_by_uuid(uint8_t *uuid) {
+  lzt::initialize_core();
+  auto driver = lzt::zeDevice::get_instance()->get_driver();
+  auto core_devices = lzt::get_ze_devices(driver);
+  for (auto device : core_devices) {
+    auto device_properties = lzt::get_device_properties(device);
+    if (is_uuid_pair_equal(uuid, device_properties.uuid.id)) {
+      return device;
+    }
+  }
+  return nullptr;
+}
+#endif // USE_ZESINIT
+
 TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenCallingEnumEnabledVFExpThenValidVFHandlesAreReturned) {
@@ -335,6 +358,37 @@ TEST_F(
 
   if (!is_vf_enabled) {
     FAIL() << "No VF handles found in any of the devices!!";
+  }
+}
+
+TEST_F(
+    VF_MANAGEMENT_TEST,
+    GivenValidDeviceWhenRetrievingVfMemoryUtilizationAndMemoryIsAllocatedOnDeviceThenExpectUpdatedMemoryUtilization) {
+  for (auto device : devices) {
+    uint32_t iteration = 0;
+    for (int i = 0; i < iteration; i++) {
+      std::cout << "Iteration : " << iteration << std::endl;
+      // 1 MB
+      uint32_t mem_alloc_size = 1048576;
+      uint32_t temp = 0;
+      std::cout << "[Befor memory allocation] Enter 1 to continue ... "
+                << std::endl;
+      std::cin >> temp;
+#ifdef USE_ZESINIT
+      auto sysman_device_properties = lzt::get_sysman_device_properties(device);
+      ze_device_handle_t core_device =
+          get_core_device_by_uuid(sysman_device_properties.core.uuid.id);
+      EXPECT_NE(core_device, nullptr);
+      void *ptr = lzt::allocate_device_memory(mem_alloc_size, 1, 0, core_device,
+                                              lzt::get_default_context());
+#else  // USE_ZESINIT
+      void *ptr = lzt::allocate_device_memory(mem_alloc_size);
+#endif // USE_ZESINIT
+      std::cout << "[After memory allocation] Enter 1 to continue ... "
+                << std::endl;
+      std::cin >> temp;
+      lzt::free_memory(ptr);
+    }
   }
 }
 
