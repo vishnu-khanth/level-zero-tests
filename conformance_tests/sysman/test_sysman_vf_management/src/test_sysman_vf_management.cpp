@@ -76,7 +76,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -108,7 +108,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -134,7 +134,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -162,7 +162,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -186,7 +186,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -211,7 +211,7 @@ TEST_F(
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
@@ -241,7 +241,7 @@ TEST_F(VF_MANAGEMENT_TEST,
   }
 
   if (!is_vf_enabled) {
-    FAIL() << "No VF handles found in the machine!!";
+    FAIL() << "No VF handles found in all devices!!";
   }
 }
 
