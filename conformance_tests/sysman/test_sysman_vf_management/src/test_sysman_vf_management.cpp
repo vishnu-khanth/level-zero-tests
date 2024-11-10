@@ -365,7 +365,7 @@ TEST_F(
     VF_MANAGEMENT_TEST,
     GivenValidDeviceWhenRetrievingVfMemoryUtilizationAndMemoryIsAllocatedOnDeviceThenExpectUpdatedMemoryUtilization) {
   for (auto device : devices) {
-    uint32_t iteration = 0;
+    uint32_t iteration = 10;
     for (int i = 0; i < iteration; i++) {
       std::cout << "Iteration : " << iteration << std::endl;
       // 1 MB
