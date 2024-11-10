@@ -377,8 +377,8 @@ TEST_F(
                                               lzt::get_default_context());
 #else  // USE_ZESINIT
       void *ptr = lzt::allocate_device_memory(mem_alloc_size);
-      LOG_INFO << "Memory allocated ...\n";
 #endif // USE_ZESINIT
+      LOG_INFO << "Memory allocated ...\n";
       lzt::free_memory(ptr);
       LOG_INFO << "Memory Freed Up ...\n";
     }
