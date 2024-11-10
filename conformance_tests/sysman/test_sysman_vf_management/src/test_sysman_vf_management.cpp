@@ -367,13 +367,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t iteration = 10;
     for (int i = 0; i < iteration; i++) {
-      std::cout << "Iteration : " << i << std::endl;
-      // 1 MB
       uint32_t mem_alloc_size = 512;
-      uint32_t temp = 0;
-      std::cout << "[Befor memory allocation] Enter 1 to continue ... "
-                << std::endl;
-      std::cin >> temp;
 #ifdef USE_ZESINIT
       auto sysman_device_properties = lzt::get_sysman_device_properties(device);
       ze_device_handle_t core_device =
@@ -383,11 +377,10 @@ TEST_F(
                                               lzt::get_default_context());
 #else  // USE_ZESINIT
       void *ptr = lzt::allocate_device_memory(mem_alloc_size);
+      LOG_INFO << "Memory allocated ...\n";
 #endif // USE_ZESINIT
-      std::cout << "[After memory allocation] Enter 1 to continue ... "
-                << std::endl;
-      std::cin >> temp;
       lzt::free_memory(ptr);
+      LOG_INFO << "Memory Freed Up ...\n";
     }
   }
 }
