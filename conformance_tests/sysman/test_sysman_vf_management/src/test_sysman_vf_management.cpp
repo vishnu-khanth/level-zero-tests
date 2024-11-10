@@ -367,7 +367,7 @@ TEST_F(
   for (auto device : devices) {
     uint32_t iteration = 10;
     for (int i = 0; i < iteration; i++) {
-      std::cout << "Iteration : " << iteration << std::endl;
+      std::cout << "Iteration : " << i << std::endl;
       // 1 MB
       uint32_t mem_alloc_size = 1048576;
       uint32_t temp = 0;
