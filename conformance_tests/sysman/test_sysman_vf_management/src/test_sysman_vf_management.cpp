@@ -369,7 +369,7 @@ TEST_F(
     for (int i = 0; i < iteration; i++) {
       std::cout << "Iteration : " << i << std::endl;
       // 1 MB
-      uint32_t mem_alloc_size = 1048576;
+      uint32_t mem_alloc_size = 512;
       uint32_t temp = 0;
       std::cout << "[Befor memory allocation] Enter 1 to continue ... "
                 << std::endl;
