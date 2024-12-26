@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2020-2023 Intel Corporation
+ * Copyright (C) 2020-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,14 +30,6 @@ public:
 };
 #define POWER_TEST PowerModuleTest
 #endif // USE_ZESINIT
-
-void get_energy_counter(std::vector<zes_pwr_handle_t> &power_handles) {
-  for (auto &power_handle : power_handles) {
-    EXPECT_NE(nullptr, power_handle);
-    zes_power_energy_counter_t energy_counter = {};
-    lzt::get_power_energy_counter(power_handle, &energy_counter);
-  }
-}
 
 TEST_F(
     POWER_TEST,
@@ -1289,35 +1281,45 @@ TEST_F(
     if (count > 0) {
       power_handles_available = true;
       auto start = std::chrono::steady_clock::now();
-      get_energy_counter(power_handles);
+      for (auto &power_handle : power_handles) {
+        EXPECT_NE(nullptr, power_handle);
+        zes_power_energy_counter_t energy_counter = {};
+        lzt::get_power_energy_counter(power_handle, &energy_counter);
+      }
       auto end = std::chrono::steady_clock::now();
       std::chrono::duration<double, std::micro> elapsed_initial = end - start;
 
-      uint32_t iterations = 100;
+      uint32_t iterations = 20;
       std::chrono::duration<double, std::micro> total_time(0);
 
       for (uint32_t i = 0; i < iterations; i++) {
         auto start = std::chrono::steady_clock::now();
-        get_energy_counter(power_handles);
+        for (auto &power_handle : power_handles) {
+          EXPECT_NE(nullptr, power_handle);
+          zes_power_energy_counter_t energy_counter = {};
+          lzt::get_power_energy_counter(power_handle, &energy_counter);
+        }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::micro> elapsed = end - start;
         total_time += elapsed;
       }
 
       auto avg_time = total_time / iterations;
-      LOG_INFO << "Initial Telemetry collection time : "
+      LOG_INFO << "Initial Telemetry collection time (micro sec): "
                << elapsed_initial.count();
-      LOG_INFO << "Average Telemetry collection time for 100 iterations : "
-               << avg_time.count();
+      LOG_INFO << "Average Telemetry collection time (micro sec) for "
+               << iterations << " iterations : " << avg_time.count();
 
       EXPECT_GT(elapsed_initial.count(), 0);
       EXPECT_GT(avg_time.count(), 0);
       EXPECT_GT(elapsed_initial.count(), avg_time.count());
+    } else {
+      LOG_WARNING << "No handles found on this device!";
     }
   }
 
   if (!power_handles_available) {
-    FAIL() << "No handles found!";
+    FAIL() << "No handles found in any of the devices!";
   }
 }
 

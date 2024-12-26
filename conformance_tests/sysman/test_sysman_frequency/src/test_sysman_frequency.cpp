@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2019-2023 Intel Corporation
+ * Copyright (C) 2019-2025 Intel Corporation
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,13 +32,6 @@ public:
 };
 #define FREQUENCY_TEST FrequencyModuleTest
 #endif // USE_ZESINIT
-
-void get_frequency_state(std::vector<zes_freq_handle_t> &freq_handles) {
-  for (auto &freq_handle : freq_handles) {
-    EXPECT_NE(nullptr, freq_handle);
-    zes_freq_state_t state = lzt::get_freq_state(freq_handle);
-  }
-}
 
 TEST_F(
     FREQUENCY_TEST,
@@ -786,7 +779,10 @@ TEST_F(
     if (count > 0) {
       freq_handles_available = true;
       auto start = std::chrono::steady_clock::now();
-      get_frequency_state(freq_handles);
+      for (auto &freq_handle : freq_handles) {
+        EXPECT_NE(nullptr, freq_handle);
+        zes_freq_state_t state = lzt::get_freq_state(freq_handle);
+      }
       auto end = std::chrono::steady_clock::now();
       std::chrono::duration<double, std::micro> elapsed_initial = end - start;
 
@@ -795,26 +791,31 @@ TEST_F(
 
       for (uint32_t i = 0; i < iterations; i++) {
         auto start = std::chrono::steady_clock::now();
-        get_frequency_state(freq_handles);
+        for (auto &freq_handle : freq_handles) {
+          EXPECT_NE(nullptr, freq_handle);
+          zes_freq_state_t state = lzt::get_freq_state(freq_handle);
+        }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::micro> elapsed = end - start;
         total_time += elapsed;
       }
 
       auto avg_time = total_time / iterations;
-      LOG_INFO << "Initial Telemetry collection time : "
+      LOG_INFO << "Initial Telemetry collection time (micro sec): "
                << elapsed_initial.count();
-      LOG_INFO << "Average Telemetry collection time for 100 iterations : "
-               << avg_time.count();
+      LOG_INFO << "Average Telemetry collection time (micro sec) for "
+               << iterations << " iterations : " << avg_time.count();
 
       EXPECT_GT(elapsed_initial.count(), 0);
       EXPECT_GT(avg_time.count(), 0);
       EXPECT_GT(elapsed_initial.count(), avg_time.count());
+    } else {
+      LOG_WARNING << "No handles found on this device!";
     }
   }
 
   if (!freq_handles_available) {
-    FAIL() << "No handles found!";
+    FAIL() << "No handles found in any of the devices!";
   }
 }
 
