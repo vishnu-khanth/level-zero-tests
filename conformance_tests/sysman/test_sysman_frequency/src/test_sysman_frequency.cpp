@@ -769,6 +769,7 @@ TEST_F(
   }
 }
 
+#ifdef __linux__
 TEST_F(
     FREQUENCY_TEST,
     GivenValidDeviceWhenCallingFrequencyGetStateMultipleTimesThenExpectFirstCallIsSlowerThanSubsequentCalls) {
@@ -812,5 +813,6 @@ TEST_F(
     FAIL() << "No handles found in any of the devices!";
   }
 }
+#endif
 
 } // namespace

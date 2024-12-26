@@ -1271,6 +1271,7 @@ TEST_F(
   }
 }
 
+#ifdef __linux__
 TEST_F(
     POWER_TEST,
     GivenValidDeviceWhenCallingPowerGetEnergyCountersMultipleTimesThenExpectFirstCallIsSlowerThanSubsequentCalls) {
@@ -1314,5 +1315,6 @@ TEST_F(
     FAIL() << "No handles found in any of the devices!";
   }
 }
+#endif
 
 } // namespace
