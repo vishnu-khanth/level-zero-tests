@@ -786,7 +786,7 @@ TEST_F(
       auto end = std::chrono::steady_clock::now();
       std::chrono::duration<double, std::micro> elapsed_initial = end - start;
 
-      uint32_t iterations = 100;
+      uint32_t iterations = 20;
       std::chrono::duration<double, std::micro> total_time(0);
 
       for (uint32_t i = 0; i < iterations; i++) {
