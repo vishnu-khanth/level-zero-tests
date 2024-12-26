@@ -779,10 +779,7 @@ TEST_F(
     if (count > 0) {
       freq_handles_available = true;
       auto start = std::chrono::steady_clock::now();
-      for (auto &freq_handle : freq_handles) {
-        EXPECT_NE(nullptr, freq_handle);
-        zes_freq_state_t state = lzt::get_freq_state(freq_handle);
-      }
+      auto states = lzt::get_freq_state(freq_handles);
       auto end = std::chrono::steady_clock::now();
       std::chrono::duration<double, std::micro> elapsed_initial = end - start;
 
@@ -791,10 +788,7 @@ TEST_F(
 
       for (uint32_t i = 0; i < iterations; i++) {
         auto start = std::chrono::steady_clock::now();
-        for (auto &freq_handle : freq_handles) {
-          EXPECT_NE(nullptr, freq_handle);
-          zes_freq_state_t state = lzt::get_freq_state(freq_handle);
-        }
+        auto states = lzt::get_freq_state(freq_handles);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::micro> elapsed = end - start;
         total_time += elapsed;

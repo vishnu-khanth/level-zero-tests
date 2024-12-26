@@ -1281,11 +1281,7 @@ TEST_F(
     if (count > 0) {
       power_handles_available = true;
       auto start = std::chrono::steady_clock::now();
-      for (auto &power_handle : power_handles) {
-        EXPECT_NE(nullptr, power_handle);
-        zes_power_energy_counter_t energy_counter = {};
-        lzt::get_power_energy_counter(power_handle, &energy_counter);
-      }
+      auto energy_counters = lzt::get_power_energy_counter(power_handles);
       auto end = std::chrono::steady_clock::now();
       std::chrono::duration<double, std::micro> elapsed_initial = end - start;
 
@@ -1294,11 +1290,7 @@ TEST_F(
 
       for (uint32_t i = 0; i < iterations; i++) {
         auto start = std::chrono::steady_clock::now();
-        for (auto &power_handle : power_handles) {
-          EXPECT_NE(nullptr, power_handle);
-          zes_power_energy_counter_t energy_counter = {};
-          lzt::get_power_energy_counter(power_handle, &energy_counter);
-        }
+        auto energy_counters = lzt::get_power_energy_counter(power_handles);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::micro> elapsed = end - start;
         total_time += elapsed;

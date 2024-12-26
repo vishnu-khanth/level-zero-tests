@@ -46,11 +46,11 @@ zes_power_properties_t get_power_properties(zes_pwr_handle_t pPowerHandle) {
 }
 ze_result_t get_power_limit_count(zes_pwr_handle_t hPower, uint32_t *pCount) {
   *pCount = 0;
-  ze_result_t status = zesPowerGetLimitsExt(hPower, pCount, nullptr);  
+  ze_result_t status = zesPowerGetLimitsExt(hPower, pCount, nullptr);
   return status;
 }
-ze_result_t
-get_power_limits_ext(zes_pwr_handle_t hPower, uint32_t *pCount,
+ze_result_t get_power_limits_ext(
+    zes_pwr_handle_t hPower, uint32_t *pCount,
     std::vector<zes_power_limit_ext_desc_t> &pPowerLimitsDescriptors) {
   if (*pCount == 0) {
     ze_result_t status = get_power_limit_count(hPower, pCount);
@@ -63,14 +63,13 @@ get_power_limits_ext(zes_pwr_handle_t hPower, uint32_t *pCount,
     desc = {ZES_STRUCTURE_TYPE_POWER_LIMIT_EXT_DESC, nullptr};
   }
   ze_result_t status =
-      zesPowerGetLimitsExt(hPower, pCount, pPowerLimitsDescriptors.data());  
+      zesPowerGetLimitsExt(hPower, pCount, pPowerLimitsDescriptors.data());
   return status;
 }
 ze_result_t set_power_limits_ext(zes_pwr_handle_t hPower, uint32_t *pCount,
-                          zes_power_limit_ext_desc_t *pSustained) {
-  ze_result_t status =
-      zesPowerSetLimitsExt(hPower, pCount, pSustained);  
-  return status;  
+                                 zes_power_limit_ext_desc_t *pSustained) {
+  ze_result_t status = zesPowerSetLimitsExt(hPower, pCount, pSustained);
+  return status;
 }
 void compare_power_descriptor_structures(
     zes_power_limit_ext_desc_t firstDescriptor,
@@ -90,17 +89,17 @@ void compare_power_descriptor_structures(
   EXPECT_EQ(firstDescriptor.limit, secondDescriptor.limit);
 }
 ze_result_t get_power_limits(zes_pwr_handle_t pPowerHandle,
-                      zes_power_sustained_limit_t *pSustained,
-                      zes_power_burst_limit_t *pBurst,
-                      zes_power_peak_limit_t *pPeak) {
+                             zes_power_sustained_limit_t *pSustained,
+                             zes_power_burst_limit_t *pBurst,
+                             zes_power_peak_limit_t *pPeak) {
   ze_result_t status =
       zesPowerGetLimits(pPowerHandle, pSustained, pBurst, pPeak);
-  return status;  
+  return status;
 }
 ze_result_t set_power_limits(zes_pwr_handle_t pPowerHandle,
-                      zes_power_sustained_limit_t *pSustained,
-                      zes_power_burst_limit_t *pBurst,
-                      zes_power_peak_limit_t *pPeak) {
+                             zes_power_sustained_limit_t *pSustained,
+                             zes_power_burst_limit_t *pBurst,
+                             zes_power_peak_limit_t *pPeak) {
   ze_result_t status =
       zesPowerSetLimits(pPowerHandle, pSustained, pBurst, pPeak);
   return status;
@@ -109,8 +108,19 @@ void get_power_energy_counter(zes_pwr_handle_t pPowerHandle,
                               zes_power_energy_counter_t *pEnergy) {
   EXPECT_EQ(ZE_RESULT_SUCCESS, zesPowerGetEnergyCounter(pPowerHandle, pEnergy));
 }
+std::vector<zes_power_energy_counter_t>
+get_power_energy_counter(std::vector<zes_pwr_handle_t> &power_handles) {
+  std::vector<zes_power_energy_counter_t> energy_counters{};
+  for (auto &power_handle : power_handles) {
+    EXPECT_NE(nullptr, power_handle);
+    zes_power_energy_counter_t energy_counter = {};
+    get_power_energy_counter(power_handle, &energy_counter);
+    energy_counters.push_back(energy_counter);
+  }
+  return energy_counters;
+}
 ze_result_t get_power_energy_threshold(zes_pwr_handle_t pPowerHandle,
-                           zes_energy_threshold_t *pThreshold) {
+                                       zes_energy_threshold_t *pThreshold) {
   ze_result_t status = zesPowerGetEnergyThreshold(pPowerHandle, pThreshold);
   return status;
 }
