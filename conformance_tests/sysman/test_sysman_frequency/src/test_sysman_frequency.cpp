@@ -20,12 +20,25 @@ namespace lzt = level_zero_tests;
 namespace {
 
 #ifdef USE_ZESINIT
-class FrequencyModuleZesTest : public lzt::ZesSysmanCtsClass {};
+class FrequencyModuleZesTest : public lzt::ZesSysmanCtsClass {
+public:
+  bool freq_handles_available = false;
+};
 #define FREQUENCY_TEST FrequencyModuleZesTest
 #else // USE_ZESINIT
-class FrequencyModuleTest : public lzt::SysmanCtsClass {};
+class FrequencyModuleTest : public lzt::SysmanCtsClass {
+public:
+  bool freq_handles_available = false;
+};
 #define FREQUENCY_TEST FrequencyModuleTest
 #endif // USE_ZESINIT
+
+void get_frequency_state(std::vector<zes_freq_handle_t> &freq_handles) {
+  for (auto &freq_handle : freq_handles) {
+    EXPECT_NE(nullptr, freq_handle);
+    zes_freq_state_t state = lzt::get_freq_state(freq_handle);
+  }
+}
 
 TEST_F(
     FREQUENCY_TEST,
@@ -760,6 +773,48 @@ TEST_F(
             << "User cannot control min/max frequency setting, skipping test";
       }
     }
+  }
+}
+
+TEST_F(
+    FREQUENCY_TEST,
+    GivenValidDeviceWhenCallingFrequencyGetStateMultipleTimesThenExpectFirstCallIsSlowerThanSubsequentCalls) {
+  for (auto device : devices) {
+    uint32_t count = 0;
+    auto freq_handles = lzt::get_freq_handles(device, count);
+
+    if (count > 0) {
+      freq_handles_available = true;
+      auto start = std::chrono::steady_clock::now();
+      get_frequency_state(freq_handles);
+      auto end = std::chrono::steady_clock::now();
+      std::chrono::duration<double, std::micro> elapsed_initial = end - start;
+
+      uint32_t iterations = 100;
+      std::chrono::duration<double, std::micro> total_time(0);
+
+      for (uint32_t i = 0; i < iterations; i++) {
+        auto start = std::chrono::steady_clock::now();
+        get_frequency_state(freq_handles);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double, std::micro> elapsed = end - start;
+        total_time += elapsed;
+      }
+
+      auto avg_time = total_time / iterations;
+      LOG_INFO << "Initial Telemetry collection time : "
+               << elapsed_initial.count();
+      LOG_INFO << "Average Telemetry collection time for 100 iterations : "
+               << avg_time.count();
+
+      EXPECT_GT(elapsed_initial.count(), 0);
+      EXPECT_GT(avg_time.count(), 0);
+      EXPECT_GT(elapsed_initial.count(), avg_time.count());
+    }
+  }
+
+  if (!freq_handles_available) {
+    FAIL() << "No handles found!";
   }
 }
 
